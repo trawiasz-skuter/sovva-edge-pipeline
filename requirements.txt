@@ -1,0 +1,4 @@
+opencv-python
+mlx
+mlx-lm
+pandas

@@ -1,0 +1,9 @@
+.venv
+.vscode
+.env
+
+data/**
+!data/**/
+!data/**/.gitkeep
+
+.drafts
