@@ -1,9 +1,13 @@
 .venv
 .vscode
 .env
+.DS_Store
 
 data/**
 !data/**/
 !data/**/.gitkeep
 
 .drafts
+.backup-gate-api
+
+__pycache__
