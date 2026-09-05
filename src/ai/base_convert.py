@@ -2,13 +2,14 @@ import base64
 from PIL import Image
 import io
 
+
 def convert_tobase(chunk: list):
     """
     Returns converted image to Base64 format
 
-    Parameters: 
+    Parameters:
         List of images (numpy array)
-    
+
     Returns:
         List of converted images
     """
@@ -18,4 +19,4 @@ def convert_tobase(chunk: list):
         buffered = io.BytesIO()
         img.save(buffered, format="JPEG")
         img_bytes = buffered.getvalue()
-        yield base64.b64encode(img_bytes).decode('utf-8')
+        yield base64.b64encode(img_bytes).decode("utf-8")

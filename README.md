@@ -14,6 +14,7 @@ Kompletna dokumentacja techniczna, diagramy przepływu oraz specyfikacja moduł�
 - [docs/04_configuration.md](file:///Users/jakubmatkowski/Dokumenty/PW_repos/sovva-edge-pipeline/docs/04_configuration.md) – Konfiguracja Pydantic Settings i zmienne środowiskowe `.env`.
 - [docs/05_data_flow_and_contracts.md](file:///Users/jakubmatkowski/Dokumenty/PW_repos/sovva-edge-pipeline/docs/05_data_flow_and_contracts.md) – Schematy danych i kontrakty integracyjne z bramką danych/OpenSearch.
 - [docs/06_ecosystem_and_roadmap.md](file:///Users/jakubmatkowski/Dokumenty/PW_repos/sovva-edge-pipeline/docs/06_ecosystem_and_roadmap.md) – Kontekst ekosystemu UAV, telemetria i dalszy rozwój projektu.
+- [docs/07_code_review_and_production_improvements.md](file:///Users/jakubmatkowski/Dokumenty/PW_repos/sovva-edge-pipeline/docs/07_code_review_and_production_improvements.md) – Obiektywny Code Review, audyt modułów, dobre praktyki produkcyjne i ewaluacja inżynierska.
 
 ---
 

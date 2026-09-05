@@ -7,7 +7,9 @@ data/**
 !data/**/
 !data/**/.gitkeep
 
-.drafts
+docs
+
+.draftss
 .backup-gate-api
 
 __pycache__

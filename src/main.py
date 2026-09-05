@@ -23,15 +23,16 @@ def main():
         model_content = ollama_call("gemma4:e2b", payload)
         embedding_content = response_embedding(model_content)
         gate_payload = build_payload(
-            drone_id = "dfg231s",
+            drone_id="dfg231s",
             timestamp=datetime.now(timezone.utc),
-            location = [30.0, 21.3],
+            location=[30.0, 21.3],
             altitude_m=20.3,
             model_name="gemma4:e2b",
             caption=model_content,
-            embedding=embedding_content
+            embedding=embedding_content,
         )
         send_payload(gate_payload)
 
+
 if __name__ == "__main__":
-    main()        
+    main()
