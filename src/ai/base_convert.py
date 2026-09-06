@@ -6,6 +6,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
 def convert_tobase(chunk: list[np.ndarray], quality: int = 85) -> Iterator[str]:
     """
     Returns converted image to Base64 format

@@ -1,5 +1,6 @@
-opencv-python
-mlx
-mlx-lm
-pandas
-ollama
+opencv-python>=4.8.0
+ollama>=0.3.0
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+requests>=2.31.0
+tenacity>=8.2.0

@@ -18,7 +18,9 @@ def build_payload(
     """
     Maps raw dictionaries and variables to validate Pydantic object.
     """
-    logger.debug(f"Constructing flight data payload (drone_id='{drone_id}', model='{model_name}')")
+    logger.debug(
+        f"Constructing flight data payload (drone_id='{drone_id}', model='{model_name}')"
+    )
     telemetry_obj = TelemetryData(
         drone_id=drone_id, timestamp=timestamp, location=location, altitude=altitude_m
     )

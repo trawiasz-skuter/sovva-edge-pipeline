@@ -76,7 +76,9 @@ def extract_frames(video_path: str, all_chunks_indices: list):
     Input: Video path & list of frame indices
     Output: List of extracted frames converted to RGB format
     """
-    logger.debug(f"Initializing frame extraction from {video_path} for {len(all_chunks_indices)} chunk(s)")
+    logger.debug(
+        f"Initializing frame extraction from {video_path} for {len(all_chunks_indices)} chunk(s)"
+    )
     cap = cv.VideoCapture(video_path)
     if not cap.isOpened():
         logger.error(f"Failed to open video file for extraction: {video_path}")

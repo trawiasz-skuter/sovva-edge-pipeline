@@ -1,10 +1,11 @@
 import datetime
 import logging
+from ai.schemas import ModelPromptTemplate
 
 logger = logging.getLogger(__name__)
 
 
-def build_prompt(frames_idxs: list, fps: float) -> str:
+def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate) -> str:
     """
     This method provides active prompting allowing model
     for better context understanding of the video providing
@@ -17,35 +18,24 @@ def build_prompt(frames_idxs: list, fps: float) -> str:
     Returns:
         Text of the prompt
     """
-    logger.debug(f"Building temporal prompt for {len(frames_idxs)} frame(s) at {fps:.2f} FPS")
+    logger.debug(
+        f"Building temporal prompt for {len(frames_idxs)} frame(s) at {fps:.2f} FPS"
+    )
 
-    lines = [
-        "You are given a sequence of images.",
-        "The images are provided in the exact order listed below.",
-        "Image N corresponds to the N-th image in the input.",
-        "",
-    ]
+    lines = [template.prefix.strip(), ""]
 
     for i, j in enumerate(frames_idxs, 1):
         raw_timestamp = j / fps
         timestamp = str(datetime.timedelta(seconds=raw_timestamp))
         lines.append(f"Image {i}: timestamp {timestamp}")
 
-    lines.extend(
-        [
-            "",
-            "Analyze the sequence in chronological order.",
-            "For each image:",
-            "- describe the scene,",
-            "- identify changes from the previous image,",
-            "- infer the ongoing activity.",
-        ]
-    )
+    lines.append("")
+    lines.append(template.suffix.strip())
 
     return "\n".join(lines)
 
 
-def ollama_payload(message: str, chunk_frames):
+def ollama_payload(message: str, chunk_frames, system_prompt: str | None = None):
     """
     Model input payload creator.
     TO DO: Model options, system prompt
@@ -56,9 +46,14 @@ def ollama_payload(message: str, chunk_frames):
     Returns:
         message payload
     """
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
 
-    messages = [
-        {"role": "user", "content": message, "images": [img for img in chunk_frames]}
-    ]
+    messages.append({
+        "role": "user", 
+        "content": message, 
+        "images": [img for img in chunk_frames]
+    })
 
     return messages

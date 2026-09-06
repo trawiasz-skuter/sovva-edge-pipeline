@@ -7,6 +7,7 @@ from ai.prompt_builder import build_prompt, ollama_payload
 from ai.base_convert import convert_tobase
 from ai.vlm_client import ollama_call
 from ai.embedder import response_embedding
+from ai.profiles import get_model_profile
 from core.builder import build_payload
 from network.transmitter import send_payload
 
@@ -25,6 +26,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
 
 def main():
     logger.info("Starting SOVVA Edge Pipeline")
@@ -46,17 +48,34 @@ def main():
 
         stream = extract_frames(settings.video_path, all_idxs)
 
+        profile = get_model_profile("gemma4:e2b")
+
         for chunk_idx, chunk in enumerate(stream):
             logger.info(f"Processing chunk {chunk_idx + 1}/{total_chunks}...")
 
             chunk_stream = convert_tobase(chunk)
-            prompt_text = build_prompt(frames_idxs=all_idxs[chunk_idx], fps=fps)
-            payload = ollama_payload(prompt_text, chunk_stream)
+            prompt_text = build_prompt(
+                frames_idxs=all_idxs[chunk_idx], 
+                fps=fps,
+                template=profile.prompt_template
+            )
+            
+            payload = ollama_payload(
+                message=prompt_text, 
+                chunk_frames=chunk_stream, 
+                system_prompt=profile.prompt_template.system_prompt
+            )
 
             logger.debug(f"Chunk {chunk_idx + 1}: Querying VLM model 'gemma4:e2b'")
-            model_content = ollama_call("gemma4:e2b", payload)
-            preview_content = (model_content[:80] + "...") if model_content and len(model_content) > 80 else model_content
-            logger.info(f"Chunk {chunk_idx + 1}: VLM analysis completed: \"{preview_content}\"")
+            model_content = ollama_call(profile=profile, messages=payload)
+            preview_content = (
+                (model_content[:80] + "...")
+                if model_content and len(model_content) > 80
+                else model_content
+            )
+            logger.info(
+                f'Chunk {chunk_idx + 1}: VLM analysis completed: "{preview_content}"'
+            )
 
             logger.debug(f"Chunk {chunk_idx + 1}: Computing semantic embedding")
             embedding_content = response_embedding(model_content)
@@ -71,9 +90,13 @@ def main():
                 embedding=embedding_content,
             )
 
-            logger.debug(f"Chunk {chunk_idx + 1}: Transmitting payload to ingestion gate")
+            logger.debug(
+                f"Chunk {chunk_idx + 1}: Transmitting payload to ingestion gate"
+            )
             send_payload(gate_payload)
-            logger.info(f"Chunk {chunk_idx + 1}/{total_chunks} successfully processed and transmitted")
+            logger.info(
+                f"Chunk {chunk_idx + 1}/{total_chunks} successfully processed and transmitted"
+            )
 
         logger.info("SOVVA Edge Pipeline execution finished successfully")
 
