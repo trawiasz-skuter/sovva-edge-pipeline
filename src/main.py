@@ -50,6 +50,8 @@ def main():
 
         profile = get_model_profile("gemma4:e2b")
 
+        previous_caption = None
+
         for chunk_idx, chunk in enumerate(stream):
             logger.info(f"Processing chunk {chunk_idx + 1}/{total_chunks}...")
 
@@ -57,9 +59,10 @@ def main():
             prompt_text = build_prompt(
                 frames_idxs=all_idxs[chunk_idx], 
                 fps=fps,
-                template=profile.prompt_template
+                template=profile.prompt_template,
+                previous_caption=previous_caption
             )
-            
+
             payload = ollama_payload(
                 message=prompt_text, 
                 chunk_frames=chunk_stream, 
@@ -68,6 +71,7 @@ def main():
 
             logger.debug(f"Chunk {chunk_idx + 1}: Querying VLM model 'gemma4:e2b'")
             model_content = ollama_call(profile=profile, messages=payload)
+            previous_caption = model_content
             preview_content = (
                 (model_content[:80] + "...")
                 if model_content and len(model_content) > 80
@@ -85,7 +89,7 @@ def main():
                 timestamp=datetime.now(timezone.utc),
                 location=[30.0, 21.3],
                 altitude_m=20.3,
-                model_name="gemma4:e2b",
+                model_name=profile.model_name,
                 caption=model_content,
                 embedding=embedding_content,
             )

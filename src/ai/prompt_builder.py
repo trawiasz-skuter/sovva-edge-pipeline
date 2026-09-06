@@ -5,7 +5,7 @@ from ai.schemas import ModelPromptTemplate
 logger = logging.getLogger(__name__)
 
 
-def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate) -> str:
+def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate, previous_caption: str | None = None) -> str:
     """
     This method provides active prompting allowing model
     for better context understanding of the video providing
@@ -21,6 +21,12 @@ def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate) -
     logger.debug(
         f"Building temporal prompt for {len(frames_idxs)} frame(s) at {fps:.2f} FPS"
     )
+
+    lines = [template.prefix.strip(), ""]
+
+    if previous_caption:
+        lines.append(f'Context from immediately preceding scene: \"{previous_caption}\"')
+        lines.append("")
 
     lines = [template.prefix.strip(), ""]
 
