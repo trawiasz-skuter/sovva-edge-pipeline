@@ -25,10 +25,8 @@ def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate, p
     lines = [template.prefix.strip(), ""]
 
     if previous_caption:
-        lines.append(f'Context from immediately preceding scene: \"{previous_caption}\"')
+        lines.append(f'Context from immediately preceding scene: "{previous_caption}"')
         lines.append("")
-
-    lines = [template.prefix.strip(), ""]
 
     for i, j in enumerate(frames_idxs, 1):
         raw_timestamp = j / fps

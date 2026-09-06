@@ -69,7 +69,7 @@ def main():
                 system_prompt=profile.prompt_template.system_prompt
             )
 
-            logger.debug(f"Chunk {chunk_idx + 1}: Querying VLM model 'gemma4:e2b'")
+            logger.debug(f"Chunk {chunk_idx + 1}: Querying VLM model '{profile.model_name}'")
             model_content = ollama_call(profile=profile, messages=payload)
             previous_caption = model_content
             preview_content = (

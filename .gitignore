@@ -6,8 +6,6 @@ data/**
 !data/**/
 !data/**/.gitkeep
 
-docs
-
 .draftss
 .backup-gate-api
 
