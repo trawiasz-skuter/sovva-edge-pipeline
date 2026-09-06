@@ -1,7 +1,6 @@
 .venv
 .vscode
 .env
-.DS_Store
 
 data/**
 !data/**/
@@ -16,4 +15,6 @@ docs
 
 .drafts
 
-__pycache__
+__pycache__.drafts/
+__pycache__/
+.DS_Store
