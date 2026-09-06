@@ -1,9 +1,12 @@
+import logging
+import cv2 as cv
 import base64
-from PIL import Image
-import io
+from typing import Iterator
+import numpy as np
 
+logger = logging.getLogger(__name__)
 
-def convert_tobase(chunk: list):
+def convert_tobase(chunk: list[np.ndarray], quality: int = 85) -> Iterator[str]:
     """
     Returns converted image to Base64 format
 
@@ -13,10 +16,12 @@ def convert_tobase(chunk: list):
     Returns:
         List of converted images
     """
-
-    for _, frame in enumerate(chunk):
-        img = Image.fromarray(frame)
-        buffered = io.BytesIO()
-        img.save(buffered, format="JPEG")
-        img_bytes = buffered.getvalue()
-        yield base64.b64encode(img_bytes).decode("utf-8")
+    logger.debug(f"Converting {len(chunk)} frame(s) to Base64 JPEG (quality={quality})")
+    encode_params = [int(cv.IMWRITE_JPEG_QUALITY), quality]
+    for idx, frame in enumerate(chunk):
+        bgr_frame = cv.cvtColor(frame, cv.COLOR_RGB2BGR)
+        success, buffer = cv.imencode(".jpg", bgr_frame, encode_params)
+        if success:
+            yield base64.b64encode(buffer.tobytes()).decode("utf-8")
+        else:
+            logger.warning(f"Failed to encode frame at index {idx} to JPEG")

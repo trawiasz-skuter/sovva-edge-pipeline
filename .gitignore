@@ -12,4 +12,6 @@ docs
 .draftss
 .backup-gate-api
 
+.log
+
 __pycache__

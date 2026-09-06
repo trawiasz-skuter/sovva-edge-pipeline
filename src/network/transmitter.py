@@ -1,15 +1,26 @@
+import logging
 import requests
-from core.schemas import SovvaPayload
+from config import settings
+from core.schemas import UavFlightDataPayload
 
-def send_payload(payload: SovvaPayload, api_url: str = "http://192.168.3.222:8000/api/ingest"):
+logger = logging.getLogger(__name__)
+
+
+def send_payload(
+    payload: UavFlightDataPayload, api_url: str = settings.api_end_point
+):
+    logger.debug(f"Preparing to send payload to {api_url}")
     try:
         response = requests.post(
-            api_url, 
-            data=payload.model_dump_json(), 
+            api_url,
+            data=payload.model_dump_json(),
             headers={"Content-Type": "application/json"},
-            timeout=5)
-
+            timeout=5,
+        )
         response.raise_for_status()
-        print(f"Status: {response.status_code}")
+        logger.info(f"Payload successfully delivered to {api_url} (HTTP {response.status_code})")
+
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"HTTP error delivering payload to {api_url}: {e.response.status_code} - {e.response.text}")
     except requests.exceptions.RequestException as e:
-        print(f"Błąd sieci podczas wysyłania: {e}")
+        logger.error(f"Network error communicating with {api_url}: {e}")

@@ -1,22 +1,29 @@
+import logging
 import cv2 as cv
 
+logger = logging.getLogger(__name__)
 
-def get_video_metadata(video_path) -> tuple[float, int, int, int]:
+
+def get_video_metadata(video_path: str) -> tuple[float, int, int, int]:
     """
     Read video's metadata from the source path:
     Output: Video's: FPS, Size (width x height), Number of frames
     """
-    try:
-        cap = cv.VideoCapture(video_path)
-        fps = cap.get(cv.CAP_PROP_FPS)
-        width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
-        frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-        cap.release()
+    logger.debug(f"Opening video file to extract metadata: {video_path}")
+    cap = cv.VideoCapture(video_path)
+    if not cap.isOpened():
+        logger.error(f"Failed to open video file: {video_path}")
+        raise FileNotFoundError(f"Can not open a video file: {video_path}")
 
-    except:
-        raise FileNotFoundError
+    fps = cap.get(cv.CAP_PROP_FPS)
+    width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+    frame_count = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+    cap.release()
 
+    logger.debug(
+        f"Video metadata extracted: {width}x{height}, FPS={fps:.2f}, total_frames={frame_count}"
+    )
     return fps, width, height, frame_count
 
 
@@ -26,12 +33,18 @@ def chunk_video(
     """
     Calculates frames indices to extract based on the input values:
     Input: Chunk time, Frames per chunk, Overlap between chunks, FPS and Frame count
-    Output: List of frame indices to extracxt
+    Output: List of frame indices to extract
     """
+    logger.debug(
+        f"Chunking video: chunk_t={chunk_t}s, overlap_t={overlap_t}s, target_frames_per_chunk={chunk_extr_frames}"
+    )
     chunk_total_frames = int(chunk_t * fps)
     overlap_frames = int(overlap_t * fps)
     stride_frames = chunk_total_frames - overlap_frames
     if stride_frames <= 0:
+        logger.error(
+            f"Invalid overlap configuration: overlap_t ({overlap_t}s) must be shorter than chunk_t ({chunk_t}s)"
+        )
         raise ValueError("Overlap time has to be shorter than chunk time.")
 
     all_chunks_indices = []
@@ -53,32 +66,49 @@ def chunk_video(
         if end_frame == frame_count:
             break
 
+    logger.debug(f"Partitioned video into {len(all_chunks_indices)} chunk(s)")
     return all_chunks_indices
 
 
-def extract_frames(video_path, all_chunks_indices: list):
+def extract_frames(video_path: str, all_chunks_indices: list):
     """
     Extracting frames from video based on the metadata.
     Input: Video path & list of frame indices
     Output: List of extracted frames converted to RGB format
     """
-
+    logger.debug(f"Initializing frame extraction from {video_path} for {len(all_chunks_indices)} chunk(s)")
     cap = cv.VideoCapture(video_path)
+    if not cap.isOpened():
+        logger.error(f"Failed to open video file for extraction: {video_path}")
+        raise FileNotFoundError(f"Can not open a video file: {video_path}")
 
-    for chunk in all_chunks_indices:
-        frames = []
-        for frame_idx in chunk:
-            cap.set(cv.CAP_PROP_POS_FRAMES, frame_idx)
-            ret, frame = cap.read()
+    try:
+        for chunk_idx, chunk in enumerate(all_chunks_indices):
+            frames = []
+            for frame_idx in chunk:
+                cap.set(cv.CAP_PROP_POS_FRAMES, frame_idx)
+                ret, frame = cap.read()
 
-            if ret:
-                frames.append(cv.cvtColor(frame, cv.COLOR_BGR2RGB))
-        yield frames
+                if ret:
+                    frames.append(cv.cvtColor(frame, cv.COLOR_BGR2RGB))
+                else:
+                    logger.warning(
+                        f"Failed to read frame at index {frame_idx} (chunk {chunk_idx + 1})"
+                    )
 
-    cap.release()
+            if frames:
+                logger.debug(
+                    f"Yielding batch of {len(frames)} frames for chunk {chunk_idx + 1}"
+                )
+                yield frames
+
+    finally:
+        cap.release()
+        logger.debug(f"Closed video capture stream for {video_path}")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     VIDEO_PATH = "data/input/videoplayback.mp4"
     TIME_OF_CHUNK = 10
     EXTRACTED_FRAMES_PER_CHUNK = 4
@@ -91,4 +121,4 @@ if __name__ == "__main__":
     video_chunks_generator = extract_frames(VIDEO_PATH, all_idxs)
 
     for idx, frames_batch in enumerate(video_chunks_generator):
-        print(f"Chunk{idx + 1}: Frames per batch: {len(frames_batch)}")
+        logger.info(f"Chunk {idx + 1}: Frames per batch: {len(frames_batch)}")
