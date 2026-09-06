@@ -13,9 +13,8 @@ MODEL_PROFILES: Dict[str, VLMModelProfile] = {
             ),
             suffix=(
                 "Analyze the sequence in chronological order.\n"
-                "For each image:\n"
-                "- describe the scene,\n"
-                "- identify changes from the previous image,\n"
+                "For whole chunk:\n"
+                "- describe the sequence of images scene,\n"
                 "- infer the ongoing activity."
             ),
         ),
