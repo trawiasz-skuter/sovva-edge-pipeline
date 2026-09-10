@@ -5,6 +5,7 @@ from ai.profiles import VLMModelProfile
 
 logger = logging.getLogger(__name__)
 
+
 class VLMInferenceError(Exception):
     """An exception thrown when the VLM fails to generate a response."""
 
@@ -33,13 +34,15 @@ def ollama_call(profile: VLMModelProfile, messages: list[dict]) -> str:
     )
     try:
         response = chat(
-            model=profile.model_name, 
+            model=profile.model_name,
             messages=messages,
             options=options_dict if options_dict else None,
-            )
+        )
         content = response.message.content
         if not content:
-            logger.error(f"Ollama returned an empty response for model='{profile.model_name}'")
+            logger.error(
+                f"Ollama returned an empty response for model='{profile.model_name}'"
+            )
             raise VLMInferenceError("Ollama returned empty response")
         logger.debug(
             f"Ollama VLM inference succeeded for model='{profile.model_name}' (response_length={len(content)})"

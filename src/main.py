@@ -56,20 +56,22 @@ def main():
             logger.info(f"Processing chunk {chunk_idx + 1}/{total_chunks}...")
 
             chunk_stream = convert_tobase(chunk)
-            prompt_text = build_prompt(
-                frames_idxs=all_idxs[chunk_idx], 
+            prompt_text, timestamps = build_prompt(
+                frames_idxs=all_idxs[chunk_idx],
                 fps=fps,
                 template=profile.prompt_template,
-                previous_caption=previous_caption
+                previous_caption=previous_caption,
             )
 
             payload = ollama_payload(
-                message=prompt_text, 
-                chunk_frames=chunk_stream, 
-                system_prompt=profile.prompt_template.system_prompt
+                message=prompt_text,
+                chunk_frames=chunk_stream,
+                system_prompt=profile.prompt_template.system_prompt,
             )
 
-            logger.debug(f"Chunk {chunk_idx + 1}: Querying VLM model '{profile.model_name}'")
+            logger.debug(
+                f"Chunk {chunk_idx + 1}: Querying VLM model '{profile.model_name}'"
+            )
             model_content = ollama_call(profile=profile, messages=payload)
             previous_caption = model_content
             preview_content = (
@@ -92,6 +94,7 @@ def main():
                 model_name=profile.model_name,
                 caption=model_content,
                 embedding=embedding_content,
+                frames_timestamp=timestamps
             )
 
             logger.debug(

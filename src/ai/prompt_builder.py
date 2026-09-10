@@ -5,7 +5,12 @@ from ai.schemas import ModelPromptTemplate
 logger = logging.getLogger(__name__)
 
 
-def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate, previous_caption: str | None = None) -> str:
+def build_prompt(
+    frames_idxs: list,
+    fps: float,
+    template: ModelPromptTemplate,
+    previous_caption: str | None = None,
+) -> tuple[str, list[float]]:
     """
     This method provides active prompting allowing model
     for better context understanding of the video providing
@@ -22,6 +27,7 @@ def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate, p
         f"Building temporal prompt for {len(frames_idxs)} frame(s) at {fps:.2f} FPS"
     )
 
+    timestamps_list = []
     lines = [template.prefix.strip(), ""]
 
     if previous_caption:
@@ -29,14 +35,16 @@ def build_prompt(frames_idxs: list, fps: float, template: ModelPromptTemplate, p
         lines.append("")
 
     for i, j in enumerate(frames_idxs, 1):
-        raw_timestamp = j / fps
+        raw_timestamp = round(j / fps, 3)
         timestamp = str(datetime.timedelta(seconds=raw_timestamp))
         lines.append(f"Image {i}: timestamp {timestamp}")
+        timestamps_list.append(raw_timestamp)
 
     lines.append("")
     lines.append(template.suffix.strip())
+    final_message = "\n".join(lines)
 
-    return "\n".join(lines)
+    return final_message, timestamps_list
 
 
 def ollama_payload(message: str, chunk_frames, system_prompt: str | None = None):
@@ -54,10 +62,8 @@ def ollama_payload(message: str, chunk_frames, system_prompt: str | None = None)
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
 
-    messages.append({
-        "role": "user", 
-        "content": message, 
-        "images": [img for img in chunk_frames]
-    })
+    messages.append(
+        {"role": "user", "content": message, "images": [img for img in chunk_frames]}
+    )
 
     return messages

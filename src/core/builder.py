@@ -14,6 +14,7 @@ def build_payload(
     model_name: str,
     caption: str,
     embedding: list[float],
+    frames_timestamp: list[float]
 ) -> UavFlightDataPayload:
     """
     Maps raw dictionaries and variables to validate Pydantic object.
@@ -25,6 +26,6 @@ def build_payload(
         drone_id=drone_id, timestamp=timestamp, location=location, altitude=altitude_m
     )
 
-    vlm_obj = SovvaPayload(model_name=model_name, caption=caption, embedding=embedding)
+    vlm_obj = SovvaPayload(model_name=model_name, caption=caption, embedding=embedding, frame_timestamps=frames_timestamp)
 
     return UavFlightDataPayload(model_data=vlm_obj, metrics=telemetry_obj)

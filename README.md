@@ -83,7 +83,7 @@ VIDEO_PATH="data/input/videoplayback.mp4"
 TIME_OF_CHUNK=10
 EXTRACTED_FRAMES_PER_CHUNK=4
 OVERLAP_T=2
-GATE_END_POINT="http://192.168.3.222:8000/api/ingest"
+GATE_END_POINT="http://127.0.0.1:8000/api/ingest"
 LOG_LEVEL="INFO"
 LOG_FILE_PATH="logs"
 ```

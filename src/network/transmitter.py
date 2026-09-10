@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 session = requests.Session()
 
+
 def send_payload(payload: UavFlightDataPayload, api_url: str = settings.api_end_point):
     logger.debug(f"Preparing to send payload to {api_url}")
     try:
